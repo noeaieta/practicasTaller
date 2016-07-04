@@ -1,0 +1,5 @@
+A continuacion se presentan los resultados de los tanques que pasan por los pozos del escenario ordenados en forma ascendente de acuerdo a la distancia
+
+tanque4 pozo1 1.000000
+tanque1 pozo1 5.000000
+tanque4 pozo2 7.000000
