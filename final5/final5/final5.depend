@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1468165799 source:/home/rocio/Documents/75.42 Taller de Programación I/final5/final5/main.cpp
+	<iostream>
+	<stdio.h>
+	<fstream>
+	<string>
+	<stdlib.h>
+	<math.h>
+
