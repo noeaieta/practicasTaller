@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MAX_BALAS 4
-#define MAX_CAJAS 4
+#define MAX_BALAS 25
+#define MAX_CAJAS 10
 #define MAX_RESULTADOS 2
 #define VEL_BALA 10
 #define VEL_CAJA 5
@@ -24,6 +24,7 @@ struct caja {
     string id_personaje;
     float posX;
     float posX_final;
+    bool existe;
 };
 
 struct resultado{
@@ -31,46 +32,45 @@ struct resultado{
     float distancia;
 };
 
-void calcularDistanciaRecorrida(caja *caja, resultado* &resultados, int &contador){
-    resultados[contador].distancia = caja->posX_final - caja->posX;
-    resultados[contador].id_personaje = caja->id_personaje;
-    contador++;
+int comparBalas(const void*a,const void*b){
+    if((*(bala*)a).posX > (*(bala*)b).posX) return 1;
+    if((*(bala*)a).posX == (*(bala*)b).posX) return 0;
+    if((*(bala*)a).posX < (*(bala*)b).posX) return -1;
 }
 
-void actualizarPosiciones(bala* bala, caja* caja){
-    bala->posY = bala->posY - VEL_BALA * TIMESTEP;
-    if(bala->posY <= 0){
+int comparCajas(const void* a, const void*b){
+    if((*(caja*)a).posX > (*(caja*)b).posX) return 1;
+    if((*(caja*)a).posX == (*(caja*)b).posX) return 0;
+    if((*(caja*)a).posX < (*(caja*)b).posX) return -1;
+}
+
+void verificarSiColisionan(caja* caja, bala* bala){
+
+    //cout << bala->posX << endl;
+    float tiempoCaidaBala = (bala->posY)/VEL_BALA;
+    //cout << "tiempo caida bala: " << tiempoCaidaBala << endl;
+    float tiempoColisionMaximo = (bala->posX - caja->posX)/VEL_CAJA;
+    //cout << "tiempo colision maximo: " << tiempoColisionMaximo << endl;
+    float tiempoColisionMinimo = (bala->posX+1 - caja->posX+2)/VEL_CAJA;
+    //cout << "tiempo colision minimo: " << tiempoColisionMinimo << endl;
+
+    if ((tiempoCaidaBala <= tiempoColisionMinimo) && (tiempoCaidaBala >= tiempoColisionMaximo)){
+        caja->existe = false;
         bala->existe = false;
+        caja->posX_final = tiempoCaidaBala*VEL_CAJA - caja->posX;
+        cout << caja->id_personaje << endl;
+        cout << "posX_final: " << caja->posX_final << endl;
     }
 
-    caja->posX_final = caja->posX_final + VEL_CAJA * TIMESTEP;
-
-}
-
-void choca(bala* bala, caja *caja, resultado* &resultados, int &contador){
-    bool choca = false;
-        for (int j = 0; j < MAX_CAJAS-1 ; j++){
-            actualizarPosiciones(bala,caja);
-            cout << "posicion final de caja " << caja->id_personaje << ": " <<caja->posX_final << endl;
-            cout << "estamos en la bala: " << bala->posX << " "<< bala->posY << endl;
-            if((bala->existe)&&(bala->posY >= 2)){
-                cout << "posicion final de caja " << caja->id_personaje << ": " <<caja->posX_final << endl;
-                if((bala->posX <= caja->posX_final && bala->posX+1 >= caja->posX_final) || (bala->posX >= caja->posX_final && bala->posX+1 <= caja->posX_final+2) || (bala->posX >= caja->posX_final && bala->posX+1 >= caja->posX_final+2)){
-                    cout << "Entro al if" << endl;
-                    choca = true;
-                    if(choca){
-                        calcularDistanciaRecorrida(caja, resultados, contador);
-                        bala->existe = false;
-                    }
-                }
-            }
-        }
 }
 
 int main(){
-    bala balas[MAX_BALAS];
-    caja cajas[MAX_CAJAS];
+    bala* balas = new bala[MAX_BALAS];
+    caja* cajas = new caja[MAX_CAJAS];
     resultado* resultados = new resultado[MAX_RESULTADOS];
+
+    int cantidadBalas = 0;
+    int cantidadCajas = 0;
 
     ifstream archivoBalas;
     ifstream archivoCajas;
@@ -89,6 +89,7 @@ int main(){
             balas[i].existe = true;
             i++;
         }
+        cantidadBalas = i;
     }
 
     if(archivoCajas){
@@ -100,32 +101,35 @@ int main(){
             getline(archivoCajas,posX,'\n');
             cajas[j].posX = atof(posX.c_str());
             cajas[j].posX_final = cajas[j].posX;
+            cajas[j].existe = true;
             j++;
         }
+        cantidadCajas = j;
     }
 
-    //Mostrar arrays cargados del archivo de texto
-    for(int i = 0; i < MAX_BALAS-1; i++){
-        cout << "posX: " << balas[i].posX << " posY: " << balas[i].posY << endl;
-    }
+    //Ordenar los arrays de balas y cajas
+    qsort(balas,cantidadBalas,sizeof(bala),comparBalas);
+    qsort(cajas,cantidadCajas,sizeof(caja),comparCajas);
 
-    for(int i = 0; i < MAX_CAJAS-1; i++){
-        cout << "Id Personaje: " << cajas[i].id_personaje << " posX: " << cajas[i].posX << endl;
-    }
-
-    int contador = 0;
-    for(int i = 0; i < MAX_BALAS-1; i++){
-        for(int j = 0; j < MAX_CAJAS-1; j++){
-            if(balas[i].existe){
-                cout << "contador: " << contador << endl;
-                choca(&balas[i],&cajas[j],resultados, contador);
+    //Recorrer array de cajas
+    for(int i = 0; i < cantidadCajas-1; i++){
+        if(cajas[i].existe){
+            for(int j = 0; j < cantidadBalas-1; j++){
+                if((balas[j].existe)&&(cajas[i].existe)){
+                    verificarSiColisionan(&cajas[i],&balas[j]);
+                }
             }
         }
     }
 
-    //for(int i = 0; i < MAX_RESULTADOS-1; i++){
-    //    cout << "Id Personaje: " << resultados[i].id_personaje << " Distancia recorrida: " << resultados[i].distancia << endl;
-    //}
+    //Mostrar arrays cargados del archivo de texto
+    for(int i = 0; i < cantidadBalas-1; i++){
+        cout << "posX: " << balas[i].posX << " posY: " << balas[i].posY << endl;
+    }
+
+    for(int i = 0; i < cantidadCajas-1; i++){
+        cout << "Id Personaje: " << cajas[i].id_personaje << " posX: " << cajas[i].posX << endl;
+    }
 
     return 0;
 }

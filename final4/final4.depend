@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1467923304 source:/home/noe/practicasTaller/final4/main.cpp
+	<fstream>
+	<stdlib.h>
+	<stdio.h>
+	<string>
+	<math.h>
+
+1467923721 source:/home/noe/practicasTaller/final4/main2.cpp
+	"stdio.h"
+	"stdlib.h"
+	"string.h"
+	"math.h"
+	"iostream"
+
