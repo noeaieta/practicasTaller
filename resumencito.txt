@@ -1,0 +1,65 @@
+C++ - Algunas cosillas
+-----------------------------------------------------------------------------------------------------------------------
+Repaso de manejo de archivos
+1) Incluir la librería fstream para manipulación de archivos 
+    #include <fstream>
+
+2) Crear una variable de tipo ifstream que apuntará al archivo a abrir:
+    ifstream archivo;
+
+3) Abrir el archivo usando el método open
+    archivo.open("ruta/al/archivo");
+
+4) Verificar que el archivo esté abierto y leer mientras no sea el final de archivo:
+    if(archivo){
+        while (!archivo.eof()) {
+            //cosas...
+        }   
+    }
+
+5) Dentro del ciclo de lectura, declarar strings donde se van a guardar los datos que se vayan parseando.
+Para parsear cada linea, usar el método getline(archivoPorLeer, stringDondeGuardarDato, separador)
+    string id,nombre, edad;
+    getline(archivo,id,',');
+    getline(archivo,nombre,',');
+    getline(archivo,edad,'\n');
+En este caso, el separador entre columnas del archivo es la coma ','. Para indicar que se termina una línea, 
+se usa el caracter '\n'
+
+6) Como todos los datos parseados se almacenaron en strings, hay que hacer los casteos correspondientes en caso
+de querer usar otro tipo de dato (Usar atoi(dato.c_str()), atof(dato.c_str()), etc.)
+
+7) Realizar las operaciones necesarias
+
+8) Cerrar el archivo para liberar los recursos asociados al mismo antes de finalizar la ejecucion
+    archivo.close();
+-----------------------------------------------------------------------------------------------------------------------
+Ordenamiento 
+Aparentemente siempre piden ordenar un array o cosas así. El método qsort() está en la librería stdlib de C++
+
+void qsort (void* base, size_t cantidadElementos, size_t size, int (*compar)(const void*,const void*));
+
+El método ordena la cantidadElementos del array al que apunta el parámetro base. Cada elemento tiene una longitud size, y se utiliza la función
+compar para determinar el órden. 
+El algoritmo de ordenamiento usado por esta función compara pares de elementos llamando a la función compar especificada
+La función no retorna ningún valor, pero modifica el contenido del array apuntado por base, reordenando sus elementos según la definición dada en compar
+Si hay elementos equivalentes, el orden que se les asigna es indefinido
+
+Parámetros que recibe qsort:
+    - base: puntero al primer objeto del array a ordenar, casteado a void*
+    - cantidadElementos: cantidad de elementos en el array a los que apunta base
+    - size: tamaño en bytes de cada elemento del array
+    - compar: puntero a una función que compara dos elementos. Esta función es llamada reiteradas veces por qsort para comparar dos elementos. 
+      la firma de la función compar es la siguiente: int compar (const void* p1, const void* p2);
+      compar recibe dos punteros a void como argumentos. La función define el orden de los elementos retornando 
+                < 0	Si el elemento al que apunta p1 va antes del elemento al que apunta p2
+                  0	Si el elemento al que apunta p1 es equivalente al que apunta p2
+                > 0	Si el elemento al que apunta p1 va después del elemento al que apunta p2
+
+Un ejemplo de definicion de compar, puede ser el siguiente: 
+    int compar (const void * a, const void * b){
+        if ( *(tipo*)a <  *(tipo*)b ) return -1;
+        if ( *(tipo*)a == *(tipo*)b ) return 0;
+        if ( *(tipo*)a >  *(tipo*)b ) return 1;
+    }
+

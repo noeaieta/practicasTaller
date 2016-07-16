@@ -1,0 +1,1 @@
+El final esta hecho en base a dos finales identicos que pedian salidas distintas. El original pedia la distancia recorrida hasta "chocar". Luego se agrego la funcionalidad que muestra todas las balas que chocaron con esa plataforma.
