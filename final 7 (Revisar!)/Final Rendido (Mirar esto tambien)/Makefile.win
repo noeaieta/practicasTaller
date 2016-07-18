@@ -1,0 +1,36 @@
+# Project: Final2
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = main.o Barril.o Personaje.o $(RES)
+LINKOBJ  = main.o Barril.o Personaje.o $(RES)
+LIBS =  -L"D:/Dev-Cpp1/lib"  
+INCS =  -I"D:/Dev-Cpp1/include" 
+CXXINCS =  -I"D:/Dev-Cpp1/lib/gcc/mingw32/3.4.2/include"  -I"D:/Dev-Cpp1/include/c++/3.4.2/backward"  -I"D:/Dev-Cpp1/include/c++/3.4.2/mingw32"  -I"D:/Dev-Cpp1/include/c++/3.4.2"  -I"D:/Dev-Cpp1/include" 
+BIN  = Final2.exe
+CXXFLAGS = $(CXXINCS)  
+CFLAGS = $(INCS)  
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before Final2.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "Final2.exe" $(LIBS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+Barril.o: Barril.cpp
+	$(CPP) -c Barril.cpp -o Barril.o $(CXXFLAGS)
+
+Personaje.o: Personaje.cpp
+	$(CPP) -c Personaje.cpp -o Personaje.o $(CXXFLAGS)

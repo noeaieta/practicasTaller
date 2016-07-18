@@ -1,0 +1,6 @@
+a;6.5;5;derecha;derecha;
+b;8;5;derecha;izquierda;
+c;7;10;izquierda;derecha;izquierda;
+d;13.25;8;derecha;
+e;14;6;izquierda;izquierda;derecha;izquierda;
+f;19;2;izquierda;derecha;derecha;

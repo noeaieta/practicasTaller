@@ -1,0 +1,158 @@
+// Final Taller (Tanques2).cpp: define el punto de entrada de la aplicación de consola.
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include "math.h"
+
+using namespace std;
+
+const int MAX_POZOS = 50;
+const int MAX_TANQUES = 50;
+
+typedef struct{
+	char id[20];
+	float x, y, radio;
+}Pozo;
+
+typedef struct{
+	char id[20];
+	float x, y;
+	char direccion;
+}Tanque;
+
+typedef struct{
+	char idPozo[20];
+	char idTanque[20];
+	float distancia;
+}Caida;
+
+
+int obtenerPozos(Pozo* pozos){
+	FILE* archivo;
+	archivo = fopen("pozos.txt", "r");
+	int i;
+	for (i = 0; ! feof(archivo); i++){
+		fscanf(archivo, "%s %f %f %f", pozos[i].id, &pozos[i].x, &pozos[i].y, &pozos[i].radio);
+		//cout << pozos[i].id << " " << pozos[i].x << " " << pozos[i].y << " " << pozos[i].radio << endl;
+	}
+	//getchar();
+	fclose(archivo);
+	return i;
+}
+
+int compararPozosHorizontal (const void* a, const void* b){
+	float x1 = ((Pozo*)a)->x - ((Pozo*)a)->radio;
+	float x2 = ((Pozo*)b)->x - ((Pozo*)b)->radio;
+	if (x1 > x2) return 1;
+	if (x1 == x2) return 0;
+	return -1;
+}
+
+void ordenarPozosDeIzqADer(Pozo* pozos, int cantidad){
+	qsort(pozos, cantidad, sizeof(Pozo), compararPozosHorizontal);
+}
+
+int compararPozosVertical (const void* a, const void* b){
+	float y1 = ((Pozo*)a)->y - ((Pozo*)a)->radio;
+	float y2 = ((Pozo*)b)->y - ((Pozo*)b)->radio;
+	if (y1 > y2) return 1;
+	if (y1 == y2) return 0;
+	return -1;
+}
+
+void ordenarPozosDeAbajoAArriba(Pozo* pozos, int cantidad){
+	qsort(pozos, cantidad, sizeof(Pozo), compararPozosVertical);
+}
+
+bool cayoTanqueEnPozo(Tanque tanque, Pozo pozo){
+	return ((sqrt(pow(tanque.x - pozo.x,2) + pow(tanque.y - pozo.y,2))) < pozo.radio);
+}
+
+bool verificarCaidaEntreTanqueYPozo(Tanque tanque, Pozo pozo, float &distanciaRecorrida){
+	bool cayo = false;
+	bool termino = false;
+	bool horizontalmente = false;
+	float xInicial = tanque.x;
+	float yInicial = tanque.y;
+	if (tanque.direccion == 'H') horizontalmente = true;
+	if ((tanque.x < (pozo.x - pozo.radio)) && horizontalmente){
+		//cout << "Ubico horizontalmente el tanque " << tanque.id << " al comienzo del pozo " << pozo.id << endl;
+		tanque.x = pozo.x - pozo.radio;
+	}
+	if ((tanque.y < (pozo.y - pozo.radio)) && ! horizontalmente){
+		//cout << "Ubico verticalmente el tanque " << tanque.id << " al comienzo del pozo " << pozo.id << endl;
+		tanque.y = pozo.y - pozo.radio;
+	}
+	while (! termino){
+		if (cayoTanqueEnPozo(tanque, pozo)){
+			cayo = true;
+			termino = true;
+			cout << "El tanque " << tanque.id << " cayo en el pozo " << pozo.id << endl;
+			if (horizontalmente) distanciaRecorrida = tanque.x - xInicial;
+			else distanciaRecorrida = tanque.y - yInicial;
+		} else {
+			if (horizontalmente) tanque.x = tanque.x + 0.001;
+			else tanque.y = tanque.y + 0.001;
+		}
+		if ( (horizontalmente && (tanque.x > pozo.x + pozo.radio)) || ((! horizontalmente) && (tanque.y > pozo.y + pozo.radio)))
+			termino = true;
+	}
+	return cayo;
+}
+
+int procesarCaidas(Pozo* pozos, int cantidadPozos, Caida* caidas){
+	FILE* archivo;
+	archivo = fopen("tanques.txt", "r");
+	int cantidadCaidas = 0;
+	while (! feof(archivo)){
+		Tanque tanque;
+		fscanf(archivo, "%s %f %f %c", tanque.id, &tanque.x, &tanque.y, &tanque.direccion);
+		if (tanque.direccion == 'H') ordenarPozosDeIzqADer(pozos, cantidadPozos);
+		else if (tanque.direccion == 'V') ordenarPozosDeAbajoAArriba(pozos, cantidadPozos);
+		for (int i = 0; i < cantidadPozos; i++){
+			float distanciaRecorrida;
+			if (verificarCaidaEntreTanqueYPozo(tanque, pozos[i], distanciaRecorrida)){
+				strcpy(caidas[cantidadCaidas].idTanque, tanque.id);
+				strcpy(caidas[cantidadCaidas].idPozo, pozos[i].id);
+				caidas[cantidadCaidas].distancia = distanciaRecorrida;
+				cantidadCaidas++;
+				break;
+			}
+		}
+	}
+	fclose(archivo);
+	return cantidadCaidas;
+}
+
+int compararCaidas(const void *a, const void *b){
+	float d1 = ((Caida*)a)->distancia;
+	float d2 = ((Caida*)b)->distancia;
+	if (d1 > d2) return 1;
+	if (d1 == d2) return 0;
+	return -1;
+}
+
+void ordenarCaidasPorDistancia(Caida* caidas, int cantidadCaidas){
+	qsort(caidas, cantidadCaidas, sizeof(Caida), compararCaidas);
+}
+
+void imprimirCaidas(Caida* caidas, int cantidadCaidas){
+	cout << "ID_TANQ\t\t\tID_POZO\t\t\tDIST" << endl;
+	for (int i = 0; i < cantidadCaidas; i++){
+		cout << caidas[i].idTanque << "\t\t\t" << caidas[i].idPozo << "\t\t" << caidas[i].distancia << endl;
+	}
+	getchar();
+}
+
+int main(int argc, char* argv[])
+{
+	Pozo pozos[MAX_POZOS];
+	int cantidadPozos = obtenerPozos(pozos);
+	Caida caidas[MAX_TANQUES];
+	int cantidadCaidas = procesarCaidas(pozos, cantidadPozos, caidas);
+	ordenarCaidasPorDistancia(caidas, cantidadCaidas);
+	imprimirCaidas(caidas, cantidadCaidas);
+	return 0;
+}
+

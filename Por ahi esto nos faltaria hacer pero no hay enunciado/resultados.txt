@@ -1,0 +1,5 @@
+Se mostraran los ganadores de cada partida.
+Partida 1
+juan 200	pepe 200	
+Partida 2
+pedro 200	
