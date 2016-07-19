@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1468954193 source:/home/noe/practicasTaller/final 3_NuevaVersion/final3_nuevaversion/main.cpp
+	<iostream>
+	<fstream>
+	<stdlib.h>
+	<stdio.h>
+	<string>
+	<math.h>
+
