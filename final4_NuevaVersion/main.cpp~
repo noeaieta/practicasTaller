@@ -18,8 +18,7 @@ struct Tanque{
 
 struct Pozo{
     string id;
-    float 
-x;
+    float x;
     float y;
     float radio;
 };
